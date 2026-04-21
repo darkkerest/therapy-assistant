@@ -1,0 +1,246 @@
+.session-view {
+  width: 100%;
+  height: 100vh;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-sf);
+  font-size: 13px;
+  letter-spacing: -0.1px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sv-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sp-5);
+  height: 48px;
+  background: var(--nav-bg);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.sv-title {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.sv-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+  animation: sv-pulse 2s infinite;
+  flex-shrink: 0;
+}
+
+@keyframes sv-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.sv-client {
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: -0.2px;
+  color: var(--text-primary);
+}
+
+.sv-timer {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.sv-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+
+.sv-btn {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 5px 14px;
+  border-radius: var(--r-pill);
+  letter-spacing: -0.1px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.sv-btn:hover {
+  background: rgba(255,255,255,0.08);
+  border-color: var(--border-strong);
+  color: var(--text-primary);
+}
+
+.sv-btn-end {
+  color: var(--red);
+  border-color: rgba(255,69,58,0.25);
+}
+
+.sv-btn-end:hover {
+  background: var(--red-muted);
+  border-color: rgba(255,69,58,0.4);
+  color: var(--red);
+}
+
+.sv-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.sv-transcript-pane {
+  flex: 1.5;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.sv-hints-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sv-pane-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-quaternary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: var(--sp-3) var(--sp-4) var(--sp-2);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sv-transcript {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-3) var(--sp-4) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.sv-turn {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-2);
+}
+
+.sv-turn-interim {
+  opacity: 0.5;
+}
+
+.sv-speaker {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 2px;
+  letter-spacing: 0;
+}
+
+.sv-speaker-therapist {
+  background: var(--green-muted);
+  color: var(--green);
+}
+
+.sv-speaker-client {
+  background: var(--accent-muted);
+  color: var(--accent);
+}
+
+.sv-speaker-unknown {
+  background: rgba(255,255,255,0.06);
+  color: var(--text-tertiary);
+}
+
+.sv-turn-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+
+.sv-turn-time {
+  font-size: 10px;
+  color: var(--text-quaternary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.sv-turn-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  letter-spacing: -0.1px;
+}
+
+.sv-hints {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--sp-3) var(--sp-4) var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+
+.sv-hint {
+  background: var(--accent-muted);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-md);
+  padding: var(--sp-3) var(--sp-3);
+}
+
+.sv-hint-loading {
+  color: var(--accent);
+  font-style: italic;
+  font-size: 12px;
+  letter-spacing: -0.1px;
+}
+
+.sv-hint-time {
+  font-size: 10px;
+  color: var(--text-quaternary);
+  display: block;
+  margin-bottom: var(--sp-1);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.sv-hint-text {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+  letter-spacing: -0.1px;
+}
+
+.sv-empty {
+  color: var(--text-quaternary);
+  font-style: italic;
+  font-size: 12px;
+  padding: var(--sp-2) 0;
+  margin: 0;
+  letter-spacing: -0.1px;
+}

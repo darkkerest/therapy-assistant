@@ -1,0 +1,1 @@
+петя пидор , struggling with his sexuality. 
