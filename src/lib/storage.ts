@@ -77,7 +77,7 @@ export async function readRecentSessions(
       const dateStr = d.toISOString().split('T')[0];
       try {
         const content = await readFile(`${dir}/${dateStr}.md`);
-        results.push(content.slice(0, 500));
+        results.push(extractSessionMemory(content, dateStr));
       } catch {
         // no session on this date
       }
@@ -86,6 +86,50 @@ export async function readRecentSessions(
   } catch {
     return [];
   }
+}
+
+function extractSessionMemory(content: string, date: string): string {
+  const summary = extractMarkdownSection(content, 'Саммари');
+  const keyPoints = extractMarkdownSection(content, 'Ключевые моменты');
+  const notes = extractMarkdownSection(content, 'Заметки терапевта');
+  const transcript = extractMarkdownSection(content, 'Транскрипт');
+
+  const parts = [`Дата: ${date}`];
+
+  if (summary) {
+    parts.push(`Саммари:\n${limitText(summary, 1200)}`);
+  }
+
+  if (keyPoints) {
+    parts.push(`Ключевые моменты:\n${limitText(keyPoints, 1800)}`);
+  }
+
+  if (notes && notes !== '—') {
+    parts.push(`Заметки терапевта:\n${limitText(notes, 800)}`);
+  }
+
+  if (parts.length > 1) {
+    return parts.join('\n\n');
+  }
+
+  if (transcript) {
+    return `Дата: ${date}\n\nФрагмент транскрипта:\n${limitText(transcript, 2500)}`;
+  }
+
+  return limitText(content, 2500);
+}
+
+function extractMarkdownSection(content: string, title: string): string {
+  const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const re = new RegExp(`(?:^|\\n)## ${escapedTitle}\\s*\\n([\\s\\S]*?)(?=\\n## |$)`);
+  const match = content.match(re);
+  return match?.[1]?.trim() ?? '';
+}
+
+function limitText(text: string, maxChars: number): string {
+  const normalized = text.replace(/\n{3,}/g, '\n\n').trim();
+  if (normalized.length <= maxChars) return normalized;
+  return `${normalized.slice(0, maxChars).trimEnd()}…`;
 }
 
 export async function readApproaches(dataPath: string): Promise<string> {

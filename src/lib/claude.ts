@@ -29,7 +29,7 @@ export async function requestHint(req: HintRequest): Promise<string> {
       recent_sessions: req.recentSessions,
       recent_turns: req.recentTurns
         .filter((t) => t.isFinal)
-        .slice(-20)
+        .slice(-1000)
         .map((t) => ({ speaker: t.speaker, text: t.text })),
     },
   });

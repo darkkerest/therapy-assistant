@@ -360,9 +360,24 @@ pub struct TurnInput {
 
 #[tauri::command]
 pub async fn request_hint(req: HintRequest) -> Result<String, String> {
-    let transcript = req
+    let full_transcript = req
         .recent_turns
         .iter()
+        .map(|t| {
+            let label = if t.speaker == "therapist" { "Терапевт" } else { "Клиент" };
+            format!("{}: {}", label, t.text)
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let focus_transcript = req
+        .recent_turns
+        .iter()
+        .rev()
+        .take(12)
+        .collect::<Vec<_>>()
+        .into_iter()
+        .rev()
         .map(|t| {
             let label = if t.speaker == "therapist" { "Терапевт" } else { "Клиент" };
             format!("{}: {}", label, t.text)
@@ -378,19 +393,22 @@ pub async fn request_hint(req: HintRequest) -> Result<String, String> {
         .collect::<Vec<_>>()
         .join("\n\n");
 
-    let system = "Ты — ассистент для психотерапевта. Даёшь короткие, конкретные подсказки прямо во время сессии.\nПодсказки должны быть: 1-3 предложения максимум, практичные, не абстрактные.\nФормат: просто текст, без маркдауна, без заголовков.";
+    let system = "Ты — клинический супервизор и ассистент психотерапевта в живой сессии. Твоя задача — не давать банальные советы, а быстро выбрать самый полезный следующий терапевтический ход.\n\nАнализируй всю текущую сессию: тему, эмоции, защиту/избегание, перенос/альянс, риск, повторяющиеся паттерны и последнюю фразу клиента. Учитывай подход терапевта и профиль клиента. Если данных мало — честно опирайся на то, что есть.\n\nНе пиши общие фразы вроде «создайте безопасное пространство», «проявите эмпатию», «задайте открытый вопрос». Дай конкретную интервенцию, которую можно сказать прямо сейчас.\n\nФормат ответа:\nВектор развития сессии: кратко опиши, куда сейчас психологически движется сессия.\nХод: конкретная фраза или микроплан для терапевта, 1-2 предложения.";
 
     let user = format!(
-        "[Подход терапевта]\n{}\n\n[Профиль клиента]\n{}\n\n[Последние сессии]\n{}\n\n[Текущая сессия]\n{}\n\n[ЗАДАЧА]\nДай одну короткую подсказку: что сейчас можно сказать или спросить клиенту.",
+        "[Подход терапевта]\n{}\n\n[Профиль клиента]\n{}\n\n[Короткие саммари прошлых сессий]\n{}\n\n[Вся текущая сессия: {} финальных реплик, максимум 1000]\n{}\n\n[Последние реплики в фокусе]\n{}\n\n[ЗАДАЧА]\nОпредели вектор развития сессии и предложи следующий точный терапевтический ход. Ход должен учитывать короткие саммари прошлых сессий, последние реплики и всю текущую сессию, а не быть универсальным советом.",
         if req.approaches.is_empty() { "Не указан" } else { &req.approaches },
         if req.profile.is_empty() { "Профиль не заполнен" } else { &req.profile },
         if session_ctx.is_empty() { "Нет" } else { &session_ctx },
-        if transcript.is_empty() { "Пусто" } else { &transcript },
+        req.recent_turns.len(),
+        if full_transcript.is_empty() { "Пусто" } else { &full_transcript },
+        if focus_transcript.is_empty() { "Пусто" } else { &focus_transcript },
     );
 
     let body = serde_json::json!({
         "model": CLAUDE_MODEL,
-        "max_tokens": 200,
+        "max_tokens": 400,
+        "temperature": 0.35,
         "system": system,
         "messages": [{ "role": "user", "content": user }]
     });

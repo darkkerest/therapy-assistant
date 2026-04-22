@@ -134,7 +134,7 @@ export function useSession(clientId: string) {
   }, []);
 
   const getRecentTurns = useCallback(
-    (count = 20) => {
+    (count = 1000) => {
       return session?.turns.filter((t) => t.isFinal).slice(-count) ?? [];
     },
     [session]
