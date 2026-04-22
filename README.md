@@ -2,6 +2,14 @@
 
 Десктопное приложение для психотерапевтов. Слушает Zoom-звонок (оба голоса), транскрибирует в реальном времени и показывает подсказки поверх Zoom в маленьком флоатинг-окне.
 
+## Установка
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/darkkerest/therapy-assistant/main/install.sh | bash
+```
+
+Первый запуск локальной транскрипции скачает Parakeet v3 через FluidAudio. После этого транскрипция работает локально.
+
 ## Стек
 
 - **Tauri v2** (Rust backend + WebView frontend)
