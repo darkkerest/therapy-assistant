@@ -8,6 +8,8 @@ interface Props {
   elapsedSeconds: number;
   lastHint: string | null;
   hintLoading: boolean;
+  transcriptionStatus: string;
+  transcriptionStatusMessage: string;
   onExpand: () => void;
   onManualHint: () => void;
   onNote: () => void;
@@ -21,6 +23,8 @@ export function FloatingHint({
   elapsedSeconds,
   lastHint,
   hintLoading,
+  transcriptionStatus,
+  transcriptionStatusMessage,
   onExpand,
   onManualHint,
   onNote,
@@ -41,6 +45,7 @@ export function FloatingHint({
   }, [lastHint]);
 
   const elapsed = formatTime(elapsedSeconds);
+  const isTranscriptReady = transcriptionStatus === 'ready';
   const finalTurns = session?.turns.filter((t) => t.isFinal) ?? [];
   const lastTurn = finalTurns[finalTurns.length - 1];
 
@@ -48,7 +53,7 @@ export function FloatingHint({
     <div className="floating-hint">
       <div className="fh-header">
         <div className="fh-client">
-          <span className="fh-dot" />
+          <span className={`fh-dot ${isTranscriptReady ? 'ready' : 'loading'}`} />
           <span className="fh-client-name">{clientName || 'Сессия'}</span>
         </div>
         <div className="fh-controls">
@@ -65,7 +70,7 @@ export function FloatingHint({
         ) : displayedHint ? (
           <p>{displayedHint}</p>
         ) : (
-          <p className="fh-placeholder">Нажмите ⌘⇧H для подсказки</p>
+          <p className="fh-placeholder">{transcriptionStatusMessage || 'Нажмите ⌘⇧H для подсказки'}</p>
         )}
       </div>
 

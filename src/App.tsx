@@ -49,12 +49,19 @@ export default function App() {
 
   const isSessionActive = view === 'session-compact' || view === 'session-full';
 
-  const { start: startTranscription, stop: stopTranscription } =
+  const {
+    start: startTranscription,
+    stop: stopTranscription,
+    error: transcriptionError,
+    status: transcriptionStatus,
+    statusMessage: transcriptionStatusMessage,
+  } =
     useTranscription({
       micDevice: config?.audio_mic_device ?? '',
       systemDevice: config?.audio_system_device ?? '',
       deepgramKey: config?.deepgram_api_key ?? '',
       language: config?.language ?? 'ru',
+      transcribeBackend: config?.transcribe_backend ?? 'local',
       onResult: addTranscriptResult,
     });
 
@@ -71,7 +78,7 @@ export default function App() {
   useEffect(() => {
     readConfig().then(async (cfg) => {
       setConfig(cfg);
-      const isSetup = cfg.deepgram_api_key && cfg.anthropic_api_key;
+      const isSetup = cfg.anthropic_api_key;
       if (isSetup) {
         await ensureDataDirs(cfg.data_path);
         const cl = await listClients(cfg.data_path);
@@ -136,10 +143,12 @@ export default function App() {
 
   const handleStartSession = useCallback(async () => {
     if (!selectedClient || !config) return;
+    const transcriptionStarted = await startTranscription();
+    if (!transcriptionStarted) return;
+
     startSession();
     setView('session-compact');
     if (config.hints_mode !== 'manual') startAutoHints();
-    await startTranscription();
   }, [selectedClient, config, startSession, startAutoHints, startTranscription]);
 
   const handleEndSession = useCallback(async () => {
@@ -231,6 +240,8 @@ export default function App() {
           elapsedSeconds={elapsed}
           lastHint={lastHint}
           hintLoading={hintLoading}
+          transcriptionStatus={transcriptionStatus}
+          transcriptionStatusMessage={transcriptionStatusMessage}
           onExpand={() => setView('session-full')}
           onManualHint={triggerManual}
           onNote={handleNote}
@@ -318,6 +329,9 @@ export default function App() {
                   dataPath={config.data_path}
                   onStart={handleStartSession}
                 />
+                {transcriptionError && (
+                  <p className="sv-transcription-error">{transcriptionError}</p>
+                )}
                 <div className="sv-audio-strip">
                   <AudioIndicator config={config} />
                 </div>

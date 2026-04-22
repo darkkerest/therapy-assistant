@@ -2,6 +2,7 @@ use tauri::Emitter;
 use crate::audio::{
     capture::{list_input_devices, start_mic_capture, start_system_capture},
     stream::stream_to_deepgram,
+    transcribe_local::LocalTranscriber,
     AudioState,
 };
 use serde::{Deserialize, Serialize};
@@ -9,6 +10,8 @@ use std::fs;
 use std::path::PathBuf;
 use tauri::{AppHandle, Manager, State, Window};
 use tokio::sync::mpsc;
+
+const CLAUDE_MODEL: &str = "claude-sonnet-4-6";
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AudioDevice {
@@ -29,7 +32,11 @@ pub struct AppConfig {
     pub hotkey_hint: String,
     pub hotkey_note: String,
     pub hotkey_end: String,
+    #[serde(default = "default_backend")]
+    pub transcribe_backend: String,
 }
+
+fn default_backend() -> String { "local".into() }
 
 impl Default for AppConfig {
     fn default() -> Self {
@@ -49,6 +56,7 @@ impl Default for AppConfig {
             hotkey_hint: "CommandOrControl+Shift+H".into(),
             hotkey_note: "CommandOrControl+Shift+N".into(),
             hotkey_end: "CommandOrControl+Shift+S".into(),
+            transcribe_backend: "local".into(),
         }
     }
 }
@@ -67,13 +75,29 @@ pub fn get_audio_devices() -> Vec<AudioDevice> {
 
 #[tauri::command]
 pub async fn start_audio_capture(
+    app: AppHandle,
     state: State<'_, AudioState>,
     window: Window,
     mic_device: String,
     system_device: String,
     deepgram_key: String,
     language: String,
+    transcribe_backend: String,
 ) -> Result<(), String> {
+    // Local backend: parakeet-helper captures audio itself.
+    if transcribe_backend == "local" {
+        let transcriber = LocalTranscriber::spawn(&app, window)
+            .await
+            .map_err(|e| e.to_string())?;
+        let mut inner = state.0.lock().unwrap();
+        if let Some(mut previous) = inner.local_transcriber.take() {
+            previous.terminate();
+        }
+        inner.local_transcriber = Some(transcriber);
+        return Ok(());
+    }
+
+    // Deepgram path: set up cpal streams
     let levels = {
         let inner = state.0.lock().unwrap();
         inner.levels.clone()
@@ -82,7 +106,6 @@ pub async fn start_audio_capture(
     let (mic_tx, mut mic_rx) = mpsc::channel::<Vec<i16>>(512);
     let (sys_tx, mut sys_rx) = mpsc::channel::<Vec<i16>>(512);
     let (audio_tx, audio_rx) = mpsc::channel::<Vec<i16>>(1024);
-    let (result_tx, mut result_rx) = mpsc::channel(128);
 
     let mic_stream = start_mic_capture(&mic_device, mic_tx, levels.clone())
         .map_err(|e| e.to_string())?;
@@ -104,24 +127,27 @@ pub async fn start_audio_capture(
         }
     });
 
+    // Store non-Send cpal streams before any .await
+    {
+        let mut inner = state.0.lock().unwrap();
+        inner.mic_stream = Some(mic_stream);
+        inner.system_stream = Some(sys_stream);
+        inner.audio_tx = Some(audio_tx);
+    }
+
+    let (result_tx, mut result_rx) = mpsc::channel(128);
     let window_clone = window.clone();
     tokio::spawn(async move {
         while let Some(result) = result_rx.recv().await {
             let _ = window_clone.emit("transcript", &result);
         }
     });
-
     let deepgram_handle = tokio::spawn(async move {
         if let Err(e) = stream_to_deepgram(deepgram_key, language, audio_rx, result_tx).await {
             log::error!("deepgram error: {}", e);
         }
     });
-
-    let mut inner = state.0.lock().unwrap();
-    inner.mic_stream = Some(mic_stream);
-    inner.system_stream = Some(sys_stream);
-    inner.deepgram_abort = Some(deepgram_handle.abort_handle());
-    inner.audio_tx = Some(audio_tx);
+    state.0.lock().unwrap().deepgram_abort = Some(deepgram_handle.abort_handle());
 
     Ok(())
 }
@@ -131,6 +157,9 @@ pub async fn stop_audio_capture(state: State<'_, AudioState>) -> Result<(), Stri
     let mut inner = state.0.lock().unwrap();
     if let Some(handle) = inner.deepgram_abort.take() {
         handle.abort();
+    }
+    if let Some(mut transcriber) = inner.local_transcriber.take() {
+        transcriber.terminate();
     }
     inner.mic_stream = None;
     inner.system_stream = None;
@@ -360,7 +389,7 @@ pub async fn request_hint(req: HintRequest) -> Result<String, String> {
     );
 
     let body = serde_json::json!({
-        "model": "claude-haiku-4-5-20251001",
+        "model": CLAUDE_MODEL,
         "max_tokens": 200,
         "system": system,
         "messages": [{ "role": "user", "content": user }]
@@ -412,7 +441,7 @@ pub async fn finalize_session_claude(req: FinalizeRequest) -> Result<FinalizeRes
     );
 
     let body = serde_json::json!({
-        "model": "claude-sonnet-4-20250514",
+        "model": CLAUDE_MODEL,
         "max_tokens": 1024,
         "messages": [{ "role": "user", "content": prompt }]
     });

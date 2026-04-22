@@ -34,10 +34,18 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px var(--green);
   animation: fh-pulse 2s infinite;
   flex-shrink: 0;
+}
+
+.fh-dot.ready {
+  background: var(--green);
+  box-shadow: 0 0 6px var(--green);
+}
+
+.fh-dot.loading {
+  background: var(--orange);
+  box-shadow: 0 0 6px var(--orange);
 }
 
 @keyframes fh-pulse {

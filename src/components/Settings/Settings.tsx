@@ -174,6 +174,21 @@ export function Settings({ config, onSave, onClose }: Props) {
         </section>
 
         <section className="s-section">
+          <h3 className="s-section-title">Транскрипция</h3>
+          <label className="s-label">
+            Движок
+            <select
+              className="s-select"
+              value={form.transcribe_backend}
+              onChange={(e) => set('transcribe_backend', e.target.value as AppConfig['transcribe_backend'])}
+            >
+              <option value="local">Локальный Parakeet (быстро, без сети)</option>
+              <option value="deepgram">Deepgram (облако)</option>
+            </select>
+          </label>
+        </section>
+
+        <section className="s-section">
           <h3 className="s-section-title">Язык транскрипции</h3>
           <select
             className="s-select"

@@ -1,6 +1,8 @@
 pub mod capture;
 pub mod stream;
+pub mod transcribe_local;
 
+use transcribe_local::LocalTranscriber;
 use std::sync::{Arc, Mutex};
 use tokio::sync::mpsc;
 
@@ -14,6 +16,7 @@ pub struct AudioStateInner {
     pub test_sys_stream: Option<cpal::Stream>,
     pub levels: Arc<Mutex<capture::AudioLevels>>,
     pub deepgram_abort: Option<tokio::task::AbortHandle>,
+    pub local_transcriber: Option<LocalTranscriber>,
     pub audio_tx: Option<mpsc::Sender<Vec<i16>>>,
 }
 
@@ -26,6 +29,7 @@ impl Default for AudioStateInner {
             test_sys_stream: None,
             levels: Arc::new(Mutex::new(capture::AudioLevels { mic: 0.0, system: 0.0 })),
             deepgram_abort: None,
+            local_transcriber: None,
             audio_tx: None,
         }
     }

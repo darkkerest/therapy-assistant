@@ -6,9 +6,11 @@
 
 - **Tauri v2** (Rust backend + WebView frontend)
 - **React + TypeScript**
-- **Deepgram** — стриминговая транскрипция с диаризацией
-- **Claude** (claude-sonnet-4-20250514) — подсказки в реальном времени
+- **Parakeet TDT v3 + FluidAudio** — локальная транскрипция на Apple Silicon
+- **Deepgram** — опциональная облачная транскрипция с диаризацией
+- **Claude Sonnet 4.6** — подсказки в реальном времени и финализация сессий
 - **cpal** — захват аудио (микрофон + системный звук)
+- **Swift helper** — отдельный локальный процесс для Parakeet v3
 
 ## Быстрый старт
 
@@ -28,14 +30,20 @@ cd therapy-assistant
 npm install
 ```
 
+Для локального Parakeet нужен Swift toolchain из Xcode Command Line Tools:
+
+```bash
+xcode-select --install
+```
+
 ### 2. Установка BlackHole (macOS)
 
 См. [AUDIO_SETUP.md](./AUDIO_SETUP.md)
 
 ### 3. API ключи
 
-- **Deepgram**: https://console.deepgram.com (200 часов бесплатно)
 - **Anthropic**: https://console.anthropic.com
+- **Deepgram**: https://console.deepgram.com (опционально, если нужен облачный backend)
 
 ### 4. Запуск в режиме разработки
 
@@ -48,6 +56,9 @@ npm run tauri dev
 ```bash
 npm run tauri build
 ```
+
+Перед `tauri dev/build` автоматически собирается Swift helper и копируется в `src-tauri/resources`.
+Parakeet v3 скачивается FluidAudio при первом запуске в `~/Library/Application Support/FluidAudio/Models`.
 
 ## Структура данных
 
@@ -77,7 +88,8 @@ npm run tauri build
 
 | Сервис | Расход | Цена |
 |--------|--------|------|
-| Deepgram nova-2 | ~60 мин | ~$0.13 |
+| Parakeet v3 | локально | $0 |
+| Deepgram nova-2 | ~60 мин | ~$0.13 (опционально) |
 | Claude (подсказки, ~30 запросов) | ~150k токенов | ~$0.45 |
 | Claude (финализация) | ~10k токенов | ~$0.03 |
-| **Итого** | | **~$0.61** |
+| **Итого с локальной транскрипцией** | | **~$0.48** |

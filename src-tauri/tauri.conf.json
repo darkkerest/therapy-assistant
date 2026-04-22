@@ -4,9 +4,9 @@
   "version": "0.1.0",
   "identifier": "com.therapy-assistant.app",
   "build": {
-    "beforeDevCommand": "npm run dev",
+    "beforeDevCommand": "npm run build:helper && npm run dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "npm run build",
+    "beforeBuildCommand": "npm run build:helper && npm run build",
     "frontendDist": "../dist"
   },
   "app": {
@@ -46,7 +46,8 @@
     ],
     "resources": ["resources/*"],
     "macOS": {
-      "minimumSystemVersion": "11.0"
+      "minimumSystemVersion": "11.0",
+      "entitlements": "entitlements.plist"
     }
   }
 }

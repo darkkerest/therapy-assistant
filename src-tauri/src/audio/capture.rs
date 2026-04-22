@@ -1,5 +1,5 @@
 use cpal::traits::{DeviceTrait, HostTrait, StreamTrait};
-use cpal::{Device, SampleFormat, StreamConfig, SupportedStreamConfig};
+use cpal::{Device, SampleFormat, StreamConfig};
 use std::sync::{Arc, Mutex};
 use anyhow::Result;
 

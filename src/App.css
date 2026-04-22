@@ -135,6 +135,17 @@
   flex-shrink: 0;
 }
 
+.sv-transcription-error {
+  margin: var(--sp-2) var(--sp-5);
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid rgba(255, 94, 94, 0.4);
+  border-radius: var(--r-sm);
+  color: var(--red);
+  background: rgba(255, 94, 94, 0.08);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .sv-select-hint {
   display: flex; align-items: center; justify-content: center;
   flex: 1;

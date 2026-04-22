@@ -40,12 +40,15 @@ npm run tauri build
 # Результат: src-tauri/target/release/bundle/macos/Therapy Assistant.app
 ```
 
+Во время `tauri dev/build` автоматически собирается Swift helper для локального Parakeet v3.
+Модель Parakeet скачивается при первом запуске через FluidAudio.
+
 ## 6. Первый запуск
 
 При первом запуске откроется онбординг:
-1. Введи API ключи (Deepgram + Anthropic)
+1. Введи Anthropic API key для подсказок; Deepgram опционален
 2. Настрой аудио устройства (установи BlackHole — см. AUDIO_SETUP.md)
 3. Создай профиль первого клиента
 4. Начни сессию
 
-## Стоимость: ~$0.61/сессия (60 мин)
+## Стоимость: локальная транскрипция $0; платными остаются только Claude-подсказки.

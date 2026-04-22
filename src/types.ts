@@ -47,6 +47,7 @@ export interface AppConfig {
   hotkey_hint: string;
   hotkey_note: string;
   hotkey_end: string;
+  transcribe_backend: 'local' | 'deepgram';
 }
 
 export interface AudioDevice {

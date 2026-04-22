@@ -105,10 +105,10 @@ export function Onboarding({ config, onComplete }: Props) {
           <div className="ob-icon">🧠</div>
           <h2>Therapy Assistant</h2>
           <p>Ассистент для психотерапевтов. Транскрибирует сессии в реальном времени и подсказывает, что спросить.</p>
-          <p className="ob-sub">Для работы нужны API-ключи Deepgram и Anthropic. Получить их бесплатно:</p>
+          <p className="ob-sub">Для подсказок нужен Anthropic. Deepgram можно не указывать: по умолчанию транскрипция идет локально через Parakeet v3.</p>
           <div className="ob-links">
-            <span>• Deepgram: <strong>console.deepgram.com</strong> (200 часов бесплатно)</span>
             <span>• Anthropic: <strong>console.anthropic.com</strong></span>
+            <span>• Deepgram: <strong>console.deepgram.com</strong> (опционально, для облачной транскрипции)</span>
           </div>
         </div>
       ),
@@ -118,7 +118,7 @@ export function Onboarding({ config, onComplete }: Props) {
       content: (
         <div className="ob-step">
           <label className="ob-label">
-            Deepgram API Key
+            Deepgram API Key (опционально)
             <input
               className="ob-input"
               type="password"

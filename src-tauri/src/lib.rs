@@ -1,6 +1,7 @@
 mod audio;
 mod commands;
 
+#[cfg(debug_assertions)]
 use tauri::Manager;
 
 pub fn run() {
@@ -37,10 +38,10 @@ pub fn run() {
             commands::setup_multi_output_device,
             commands::open_audio_midi_setup,
         ])
-        .setup(|app| {
+        .setup(|_app| {
             #[cfg(debug_assertions)]
             {
-                let window = app.get_webview_window("main").unwrap();
+                let window = _app.get_webview_window("main").unwrap();
                 window.open_devtools();
             }
             Ok(())
